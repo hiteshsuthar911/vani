@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Vani Affair — Issue 01 · October 2026</title>
+  <meta name="description" content="A little bit of everything, entirely, unapologetically Vani. A birthday magazine for the most iconic person." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Auth guard: redirect to login if not unlocked -->
+  <script>
+    if (!sessionStorage.getItem('vani_unlocked')) {
+      window.location.replace('login.html');
+    }
+  </script>
+
+  <!-- Top gradient progress bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Side navigation dots (built by JS) -->
+  <nav class="nav-dots" id="navDots" aria-label="Page navigation"></nav>
+
+  <!-- Scroll hint shown on first page -->
+  <div class="scroll-hint" id="scrollHint">
+    <span>SCROLL</span>
+    <div class="scroll-arrow"></div>
+  </div>
+
+  <!-- All pages are built dynamically by script.js -->
+  <main class="pages-container" id="pagesContainer"></main>
+
+  <!-- Confetti canvas overlay -->
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+  <script src="script.js"></script>
+</body>
+</html>

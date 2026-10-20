@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Vani Affair — Unlock Your Gift 🎁</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #080808;
+      --white: #fafaf7;
+      --rose:  #e8a598;
+      --blush: #f2c4c0;
+      --gold:  #c9a96e;
+      --gold-light: #e8c98a;
+      --font-serif:    'Playfair Display', serif;
+      --font-sans:     'Inter', sans-serif;
+      --font-editorial:'Cormorant Garamond', serif;
+      --font-cursive:  'Alex Brush', cursive;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--black);
+      font-family: var(--font-sans);
+      color: var(--white);
+    }
+
+    /* ── BACKGROUND ── */
+    .bg {
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(201,169,110,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(232,165,152,0.10) 0%, transparent 55%),
+        #080808;
+      z-index: 0;
+    }
+
+    /* Animated grain texture overlay */
+    .bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* Floating particles canvas */
+    #particleCanvas {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── OPENING WRITING ANIMATION INTRO SCREEN ── */
+    .intro-screen {
+      position: fixed; inset: 0; z-index: 500;
+      background: #080808;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: clamp(20px, 5vw, 40px);
+      transition: opacity 1.1s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 1.1s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 1.1s ease;
+      overflow: hidden;
+    }
+    .intro-screen::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 40%, rgba(201,169,110,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 85%, rgba(232,165,152,0.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .intro-screen.fade-out {
+      opacity: 0;
+      transform: scale(1.05);
+      filter: blur(12px);
+      pointer-events: none;
+    }
+
+    .intro-skip-btn {
+      position: absolute;
+      top: clamp(16px, 4vw, 30px);
+      right: clamp(16px, 4vw, 32px);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,169,110,0.28);
+      border-radius: 999px;
+      padding: 7px 18px;
+      font-size: 10px;
+      font-family: var(--font-sans);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      z-index: 10;
+    }
+    .intro-skip-btn:hover {
+      background: rgba(201,169,110,0.15);
+      color: var(--gold-light);
+      border-color: rgba(201,169,110,0.6);
+    }
+
+    .intro-content {
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      max-width: 720px;
+      width: 100%;
+    }
+
+    .intro-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 18px;
+      border: 1px solid rgba(201,169,110,0.28);
+      border-radius: 999px;
+      background: rgba(201,169,110,0.06);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: clamp(22px, 4vw, 34px);
+      opacity: 0;
+      transform: translateY(8px);
+      animation: introFadeIn 0.8s 0.2s ease forwards;
+    }
+    .badge-sparkle {
+      font-size: 11px;
+      color: var(--gold);
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    .intro-writing-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: clamp(60px, 12vw, 100px);
+      margin-bottom: clamp(14px, 3vw, 24px);
+      max-width: 90vw;
+    }
+
+    .intro-writing {
+      font-family: var(--font-cursive);
+      font-size: clamp(2.3rem, 7.2vw, 4.5rem);
+      font-weight: 400;
+      line-height: 1.3;
+      text-align: center;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #ffffff 0%, #fff4e3 28%, #e8c98a 65%, #e8a598 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 25px rgba(201,169,110,0.38));
+      word-break: break-word;
+    }
+
+    .intro-cursor {
+      display: inline-block;
+      width: 3px;
+      height: clamp(2.2rem, 6.5vw, 3.8rem);
+      background: var(--gold-light);
+      margin-left: 6px;
+      border-radius: 2px;
+      box-shadow: 0 0 12px rgba(232,201,138,0.95), 0 0 20px rgba(232,165,152,0.6);
+      animation: cursorBlink 0.65s infinite;
+      vertical-align: middle;
+    }
+    .intro-cursor.hidden {
+      display: none;
+    }
+
+    .intro-flourish {
+      width: clamp(200px, 45vw, 290px);
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .intro-flourish.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .intro-flourish svg {
+      width: 100%; height: auto; display: block;
+    }
+    .flourish-line {
+      stroke-dasharray: 320;
+      stroke-dashoffset: 320;
+      transition: stroke-dashoffset 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .intro-flourish.active .flourish-line {
+      stroke-dashoffset: 0;
+    }
+
+    .intro-sub {
+      font-family: var(--font-editorial);
+      font-style: italic;
+      font-size: clamp(0.9rem, 2.4vw, 1.1rem);
+      color: rgba(255,255,255,0.48);
+      letter-spacing: 2.5px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+    }
+    .intro-sub.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Keyframes */
+    @keyframes introFadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cursorBlink {
+      0%, 45% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.25); opacity: 1; }
+    }
+
+    /* ── WRAPPER (LOGIN FORM CONTAINER) ── */
+    .wrapper {
+      position: relative; z-index: 10;
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+    .wrapper.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    /* ── LOCK ICON ── */
+    .lock-icon {
+      width: 56px; height: 56px;
+      margin-bottom: 28px;
+    }
+    .lock-icon svg { width: 100%; height: 100%; }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(15,13,11,0.72);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(201,169,110,0.2);
+      border-radius: 2px;
+      padding: clamp(32px, 6vw, 52px) clamp(24px, 6vw, 48px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Gold corner accents */
+    .card::before, .card::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border-color: rgba(201,169,110,0.5);
+      border-style: solid;
+    }
+    .card::before {
+      top: 10px; left: 10px;
+      border-width: 1px 0 0 1px;
+    }
+    .card::after {
+      bottom: 10px; right: 10px;
+      border-width: 0 1px 1px 0;
+    }
+
+    /* ── HEADER ── */
+    .issue-line {
+      font-size: 9px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.9rem, 6vw, 2.6rem);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--white) 30%, var(--gold-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-family: var(--font-editorial);
+      font-style: italic;
+      font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 32px;
+    }
+    .divider-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201,169,110,0.35), transparent);
+    }
+    .divider-icon {
+      font-size: 14px; opacity: 0.6;
+    }
+
+    /* ── INPUT ── */
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 2px;
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      letter-spacing: 4px;
+      padding: 14px 48px 14px 18px;
+      outline: none;
+      transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+      text-align: center;
+    }
+    .password-input::placeholder {
+      letter-spacing: 6px;
+      color: rgba(255,255,255,0.2);
+      font-size: 1.2rem;
+    }
+    .password-input:focus {
+      border-color: rgba(201,169,110,0.5);
+      background: rgba(255,255,255,0.06);
+      box-shadow: 0 0 0 3px rgba(201,169,110,0.08), inset 0 0 20px rgba(201,169,110,0.03);
+    }
+
+    /* shake on wrong password */
+    .password-input.shake {
+      animation: shake 0.45s ease;
+      border-color: rgba(232,165,152,0.6);
+      box-shadow: 0 0 0 3px rgba(232,165,152,0.1);
+    }
+
+    /* Eye toggle */
+    .eye-btn {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: rgba(255,255,255,0.3);
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .eye-btn:hover { color: var(--gold); }
+
+    /* ── ERROR ── */
+    .error-msg {
+      font-size: 11px;
+      color: var(--rose);
+      text-align: center;
+      letter-spacing: 0.5px;
+      margin-top: 10px;
+      height: 16px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .error-msg.visible { opacity: 1; }
+
+    /* ── SUBMIT BUTTON ── */
+    .submit-btn {
+      width: 100%;
+      margin-top: 24px;
+      background: transparent;
+      border: 1px solid rgba(201,169,110,0.45);
+      color: var(--gold-light);
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      padding: 16px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--rose), var(--gold));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .submit-btn:hover { border-color: transparent; color: var(--black); }
+    .submit-btn:hover::before { opacity: 1; }
+    .submit-btn span { position: relative; z-index: 1; }
+    .submit-btn:hover span { color: var(--black); }
+
+    /* Loading state */
+    .submit-btn.loading span { opacity: 0; }
+    .submit-btn.loading::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      border: 2px solid rgba(201,169,110,0.3);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* ── HINT ── */
+    .hint {
+      margin-top: 26px;
+      text-align: center;
+      font-family: var(--font-editorial);
+      font-style: italic;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      color: rgba(255,255,255,0.28);
+      line-height: 1.6;
+    }
+    .hint strong {
+      color: rgba(201,169,110,0.55);
+      font-style: normal;
+      font-weight: 400;
+    }
+
+    /* ── REPLAY INTRO BUTTON ── */
+    .replay-intro-wrap {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .replay-intro-btn {
+      background: none; border: none;
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(201,169,110,0.45);
+      cursor: pointer;
+      transition: color 0.2s ease;
+      padding: 4px 8px;
+    }
+    .replay-intro-btn:hover {
+      color: var(--gold-light);
+    }
+
+    /* ── SUCCESS OVERLAY ── */
+    .success-overlay {
+      position: fixed; inset: 0; z-index: 600;
+      background: var(--black);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    .success-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .success-emoji {
+      font-size: clamp(3rem, 10vw, 5rem);
+      margin-bottom: 20px;
+      animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .success-text {
+      font-family: var(--font-serif);
+      font-size: clamp(1.4rem, 5vw, 2.2rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--white) 0%, var(--gold-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .success-sub {
+      font-family: var(--font-editorial);
+      font-style: italic;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+    }
+    .success-bar {
+      width: 0%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--rose), var(--gold));
+      margin-top: 32px;
+      border-radius: 2px;
+      transition: width 1.5s ease;
+      box-shadow: 0 0 10px rgba(201,169,110,0.5);
+    }
+    .success-overlay.active .success-bar { width: 200px; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      15%     { transform: translateX(-8px); }
+      30%     { transform: translateX(7px); }
+      45%     { transform: translateX(-6px); }
+      60%     { transform: translateX(5px); }
+      75%     { transform: translateX(-3px); }
+      90%     { transform: translateX(2px); }
+    }
+    @keyframes spin {
+      to { transform: translate(-50%,-50%) rotate(360deg); }
+    }
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    /* Dots pattern bottom decoration */
+    .deco-bottom {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201,169,110,0.2), transparent);
+    }
+    .deco-top {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201,169,110,0.2), transparent);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+  <canvas id="particleCanvas"></canvas>
+  <div class="deco-top"></div>
+  <div class="deco-bottom"></div>
+
+  <!-- ── OPENING WRITING ANIMATION INTRO ── -->
+  <div class="intro-screen" id="introScreen">
+    <button class="intro-skip-btn" id="introSkipBtn" type="button" aria-label="Skip intro">
+      Skip <span>&rarr;</span>
+    </button>
+
+    <div class="intro-content">
+      <div class="intro-badge">
+        <span class="badge-sparkle">✦</span>
+        <span class="badge-text">SPECIAL DELIVERY FOR VANI</span>
+        <span class="badge-sparkle">✦</span>
+      </div>
+
+      <div class="intro-writing-wrap">
+        <h1 class="intro-writing" id="introWriting"></h1>
+        <span class="intro-cursor" id="introCursor"></span>
+      </div>
+
+      <div class="intro-flourish" id="introFlourish">
+        <svg viewBox="0 0 280 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path class="flourish-line" d="M10 14 C 70 2, 110 26, 140 14 C 170 2, 210 26, 270 14" stroke="url(#goldGrad)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="140" cy="14" r="3" fill="#c9a96e"/>
+          <defs>
+            <linearGradient id="goldGrad" x1="0" y1="0" x2="280" y2="0" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#c9a96e" stop-opacity="0"/>
+              <stop offset="0.3" stop-color="#e8c98a"/>
+              <stop offset="0.7" stop-color="#e8a598"/>
+              <stop offset="1" stop-color="#c9a96e" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <p class="intro-sub" id="introSub">A handmade edition &nbsp;·&nbsp; October 2026</p>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS SCREEN ── -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-emoji">🎁</div>
+    <p class="success-text">Welcome, Vani!</p>
+    <p class="success-sub">Opening your gift from Vipiksha…</p>
+    <div class="success-bar" id="successBar"></div>
+  </div>
+
+  <!-- ── LOGIN CARD ── -->
+  <div class="wrapper">
+
+    <!-- Lock icon -->
+    <div class="lock-icon">
+      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="24" width="36" height="26" rx="3" stroke="#c9a96e" stroke-width="1.5"/>
+        <path d="M18 24V17a10 10 0 0 1 20 0v7" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="28" cy="36" r="3" fill="#c9a96e"/>
+        <line x1="28" y1="39" x2="28" y2="44" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="card">
+      <p class="issue-line">Issue 01 &nbsp;·&nbsp; October 2026 &nbsp;·&nbsp; Private Access</p>
+
+      <h1 class="title">The Vani<br/>Affair</h1>
+
+      <p class="subtitle">
+        A special gift from Vipiksha is waiting for you.<br/>
+        Enter the secret word to unlock it.
+      </p>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-icon">🌸</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="passwordInput">Secret Password</label>
+        <div class="password-wrap">
+          <input
+            type="password"
+            id="passwordInput"
+            class="password-input"
+            placeholder="••••"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            maxlength="30"
+          />
+          <button class="eye-btn" id="eyeBtn" type="button" aria-label="Toggle visibility">
+            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <p class="error-msg" id="errorMsg">Hmm, that's not quite right. Try again! 💕</p>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" type="button">
+        <span>Unlock My Gift ✨</span>
+      </button>
+
+      <p class="hint">
+        Hint: It's the name of the girl<br/>
+        this whole magazine is about 🌸
+      </p>
+
+      <div class="replay-intro-wrap">
+        <button type="button" class="replay-intro-btn" id="replayIntroBtn">
+          ↺ Replay opening note
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── PASSWORD ──
+    const CORRECT = 'vani';
+
+    const input          = document.getElementById('passwordInput');
+    const submitBtn      = document.getElementById('submitBtn');
+    const errorMsg       = document.getElementById('errorMsg');
+    const eyeBtn         = document.getElementById('eyeBtn');
+    const eyeIcon        = document.getElementById('eyeIcon');
+    const overlay        = document.getElementById('successOverlay');
+    const successBar     = document.getElementById('successBar');
+
+    // ── INTRO WRITING ANIMATION ELEMENTS ──
+    const introScreen    = document.getElementById('introScreen');
+    const introWriting   = document.getElementById('introWriting');
+    const introCursor    = document.getElementById('introCursor');
+    const introFlourish  = document.getElementById('introFlourish');
+    const introSub       = document.getElementById('introSub');
+    const introSkipBtn   = document.getElementById('introSkipBtn');
+    const replayIntroBtn = document.getElementById('replayIntroBtn');
+    const wrapperEl      = document.querySelector('.wrapper');
+
+    const MESSAGE = "A gift from Vipiksha to you 🤍";
+    let typeIdx = 0;
+    let typeTimeout = null;
+    let isIntroDone = false;
+
+    function playWritingAnimation() {
+      isIntroDone = false;
+      typeIdx = 0;
+      if (typeTimeout) clearTimeout(typeTimeout);
+
+      introWriting.textContent = '';
+      introCursor.classList.remove('hidden');
+      introFlourish.classList.remove('active');
+      introSub.classList.remove('active');
+      introScreen.classList.remove('fade-out');
+      wrapperEl.classList.remove('revealed');
+
+      // Start typing after brief ambient pause
+      setTimeout(typeNextChar, 500);
+    }
+
+    function typeNextChar() {
+      if (isIntroDone) return;
+      if (typeIdx < MESSAGE.length) {
+        const char = MESSAGE.charAt(typeIdx);
+        introWriting.textContent += char;
+        typeIdx++;
+
+        // Natural typing cadence
+        let delay = 65 + Math.random() * 30;
+        if (char === ' ') delay = 110;
+        if (typeIdx === 19) delay = 260; // pause after "Vipiksha"
+        if (typeIdx === 27) delay = 220; // pause after "to you"
+
+        typeTimeout = setTimeout(typeNextChar, delay);
+      } else {
+        // Typing finished
+        introCursor.classList.add('hidden');
+        introFlourish.classList.add('active');
+        introSub.classList.add('active');
+
+        // Allow reading for 1.8 seconds, then reveal login
+        setTimeout(() => {
+          dismissIntro();
+        }, 1800);
+      }
+    }
+
+    function dismissIntro() {
+      if (isIntroDone) return;
+      isIntroDone = true;
+      clearTimeout(typeTimeout);
+      introCursor.classList.add('hidden');
+      introScreen.classList.add('fade-out');
+      wrapperEl.classList.add('revealed');
+
+      setTimeout(() => {
+        input.focus();
+      }, 700);
+    }
+
+    introSkipBtn.addEventListener('click', dismissIntro);
+    if (replayIntroBtn) {
+      replayIntroBtn.addEventListener('click', playWritingAnimation);
+    }
+
+    // Run writing animation when page opens
+    playWritingAnimation();
+
+    // Eye toggle
+    let showPw = false;
+    eyeBtn.addEventListener('click', () => {
+      showPw = !showPw;
+      input.type = showPw ? 'text' : 'password';
+      eyeIcon.innerHTML = showPw
+        ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
+        : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    });
+
+    // Submit
+    function tryUnlock() {
+      const val = input.value.trim().toLowerCase();
+      if (val === CORRECT) {
+        // Success!
+        submitBtn.classList.add('loading');
+        setTimeout(() => {
+          overlay.classList.add('active');
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            document.getElementById('successBar').style.width = '200px';
+          }));
+          // Redirect after animation
+          setTimeout(() => {
+            sessionStorage.setItem('vani_unlocked', '1');
+            window.location.href = 'index.html';
+          }, 2000);
+        }, 600);
+      } else {
+        // Wrong password
+        input.classList.remove('shake');
+        void input.offsetWidth;
+        input.classList.add('shake');
+        errorMsg.classList.add('visible');
+        input.value = '';
+        input.focus();
+        setTimeout(() => {
+          input.classList.remove('shake');
+          errorMsg.classList.remove('visible');
+        }, 2500);
+      }
+    }
+
+    submitBtn.addEventListener('click', tryUnlock);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryUnlock();
+      if (errorMsg.classList.contains('visible')) {
+        errorMsg.classList.remove('visible');
+      }
+    });
+
+    // ── FLOATING PARTICLES ──
+    const canvas = document.getElementById('particleCanvas');
+    const ctx    = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const SYMBOLS = ['✦', '·', '◦', '✧', '⋆', '∘'];
+    const COLORS  = [
+      'rgba(201,169,110,0.55)',
+      'rgba(232,165,152,0.45)',
+      'rgba(242,196,192,0.4)',
+      'rgba(255,255,255,0.3)'
+    ];
+
+    class Particle {
+      constructor() { this.reset(true); }
+      reset(init = false) {
+        this.x       = Math.random() * canvas.width;
+        this.y       = init ? Math.random() * canvas.height : canvas.height + 10;
+        this.symbol  = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+        this.color   = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.size    = Math.random() * 12 + 8;
+        this.speed   = Math.random() * 0.5 + 0.2;
+        this.opacity = 0;
+        this.fade    = Math.random() * 0.008 + 0.004;
+        this.drift   = (Math.random() - 0.5) * 0.4;
+        this.rot     = 0;
+        this.rotSpeed= (Math.random() - 0.5) * 0.02;
+      }
+      update() {
+        this.y       -= this.speed;
+        this.x       += this.drift;
+        this.rot     += this.rotSpeed;
+        this.opacity  = Math.min(1, this.opacity + this.fade);
+        if (this.y < -20) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity * 0.7;
+        ctx.fillStyle   = this.color;
+        ctx.font        = `${this.size}px serif`;
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        ctx.fillText(this.symbol, 0, 0);
+        ctx.restore();
+      }
+    }
+
+    const particles = Array.from({ length: 35 }, () => new Particle());
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+  </script>
+
+</body>
+</html>

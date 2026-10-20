@@ -1,0 +1,409 @@
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black: #0a0a0a;
+  --white: #fafaf7;
+  --rose:  #e8a598;
+  --blush: #f2c4c0;
+  --gold:  #c9a96e;
+  --font-serif:    'Playfair Display', serif;
+  --font-sans:     'Inter', sans-serif;
+  --font-editorial:'Cormorant Garamond', serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  margin: 0; padding: 0;
+  overflow: hidden;
+  background: var(--black);
+  font-family: var(--font-sans);
+  color: var(--white);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px; width: 0%;
+  background: linear-gradient(90deg, var(--rose), var(--gold), var(--blush));
+  z-index: 1000;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 12px rgba(232,165,152,0.6);
+}
+
+/* ===== NAV DOTS ===== */
+.nav-dots {
+  position: fixed;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 900;
+}
+
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  cursor: pointer;
+  padding: 0; outline: none;
+  transition: all 0.3s ease;
+  display: block;
+}
+.dot:hover  { background: rgba(232,165,152,0.7); transform: scale(1.3); }
+.dot.active { background: var(--rose); border-color: var(--rose);
+              box-shadow: 0 0 8px rgba(232,165,152,0.9); transform: scale(1.5); }
+
+/* ===== SCROLL HINT ===== */
+.scroll-hint {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  z-index: 900;
+  opacity: 1; transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.scroll-hint.hidden { opacity: 0; }
+.scroll-hint span {
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.5);
+}
+.scroll-arrow {
+  width: 1.5px; height: 32px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.45), transparent);
+  animation: scrollPulse 1.8s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%,100% { opacity: 0.3; transform: scaleY(0.8); }
+  50%     { opacity: 1;   transform: scaleY(1);   }
+}
+
+/* ===== PAGES CONTAINER ===== */
+.pages-container {
+  width: 100vw;
+  /* JS sets --vh to handle mobile browser chrome */
+  height: calc(var(--vh, 1vh) * 100);
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.pages-container::-webkit-scrollbar { display: none; }
+
+/* ===== PAGE ===== */
+.page {
+  width: 100vw;
+  height: calc(var(--vh, 1vh) * 100);
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--black);
+}
+
+/* ===== IMAGE — ALWAYS FULLY VISIBLE, NEVER CROPPED ===== */
+/*
+  All PDF pages are portrait (~A4).
+  A phone viewport can be narrower in aspect ratio than the PDF page,
+  so we MUST use contain (not cover) for every page.
+  Black letterbox bars on sides are acceptable and intentional.
+*/
+.page-image-wrapper {
+  position: absolute; inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--black);
+}
+
+.page-img {
+  /* Fit the whole page into the viewport — no cropping ever */
+  display: block;
+  max-width:  100%;
+  max-height: calc(var(--vh, 1vh) * 100);
+  width:  auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center center;
+  /* Ken Burns: animation is applied via JS class on the wrapper */
+  transition: opacity 0.7s ease;
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+/* ===== SUBTLE VIGNETTE OVERLAYS ===== */
+.page-glow-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.dark-overlay {
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(201,169,110,0.04) 0%, transparent 60%),
+    linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, transparent 35%,
+                    transparent 65%, rgba(0,0,0,0.18) 100%);
+}
+.warm-overlay {
+  background:
+    radial-gradient(ellipse at 80% 80%, rgba(232,165,152,0.05) 0%, transparent 60%),
+    linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, transparent 35%,
+                    transparent 65%, rgba(0,0,0,0.14) 100%);
+}
+
+/* ===== COVER OVERLAY (text/meta) ===== */
+.cover-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.cover-meta {
+  position: absolute;
+  top: clamp(10px,3vw,22px);
+  left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 clamp(14px,4vw,28px);
+}
+.issue-tag, .date-tag {
+  font-size: clamp(8px,1.8vw,10px);
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.85);
+}
+
+/* ===== FINAL PAGE ===== */
+.final-message {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top,
+    rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.85) 45%, transparent 100%);
+  padding: clamp(40px,8vh,80px) clamp(18px,6vw,44px) clamp(28px,5vh,56px);
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.final-inner { max-width: min(480px,88vw); width: 100%; }
+.final-tag {
+  font-size: clamp(8px,1.5vw,10px);
+  letter-spacing: 6px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.final-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem,5vw,3.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.final-sub {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: clamp(0.95rem,2.5vw,1.2rem);
+  color: rgba(255,255,255,0.7);
+  line-height: 1.6;
+  margin-bottom: clamp(18px,4vh,32px);
+}
+.restart-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  color: var(--white);
+  font-family: var(--font-sans);
+  font-size: clamp(9px,1.5vw,11px);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: clamp(10px,2vh,13px) clamp(22px,5vw,34px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.restart-btn:hover, .restart-btn:focus-visible {
+  background: var(--rose);
+  border-color: var(--rose);
+  box-shadow: 0 0 20px rgba(232,165,152,0.4);
+  outline: none;
+}
+
+/* ===== CONFETTI CANVAS ===== */
+.confetti-canvas {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 800;
+}
+
+/* ===== PAGE REVEAL ANIMATION ===== */
+@keyframes pageReveal {
+  from { opacity: 0; transform: scale(1.03) translateY(5px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+
+/* ===== KEN BURNS — 6 unique cinematic zoom/pan variants ===== */
+/*
+  The wrapper gets one of these classes when the page enters view.
+  The image itself stays fully contained; KB is applied to the wrapper
+  so the zoom never clips the image edges.
+  Scale stays ≤ 1.06 to stay subtle and never exceed the image bounds.
+*/
+.page-image-wrapper.kb-active { overflow: hidden; }
+
+.page-image-wrapper.kb-1 .page-img {
+  animation: kb1 18s ease-in-out forwards;
+}
+.page-image-wrapper.kb-2 .page-img {
+  animation: kb2 20s ease-in-out forwards;
+}
+.page-image-wrapper.kb-3 .page-img {
+  animation: kb3 16s ease-in-out forwards;
+}
+.page-image-wrapper.kb-4 .page-img {
+  animation: kb4 22s ease-in-out forwards;
+}
+.page-image-wrapper.kb-5 .page-img {
+  animation: kb5 18s ease-in-out forwards;
+}
+.page-image-wrapper.kb-6 .page-img {
+  animation: kb6 20s ease-in-out forwards;
+}
+
+/* Slow zoom in from center */
+@keyframes kb1 {
+  0%   { transform: scale(1)    translate(0,    0   ); }
+  100% { transform: scale(1.06) translate(0,    0   ); }
+}
+/* Zoom in + drift right */
+@keyframes kb2 {
+  0%   { transform: scale(1.04) translate(-1%, 0.5%); }
+  100% { transform: scale(1)    translate( 1%, -0.5%); }
+}
+/* Slow zoom out from top-left */
+@keyframes kb3 {
+  0%   { transform: scale(1.06) translate(-1%, -1%); }
+  100% { transform: scale(1)    translate( 0,   0  ); }
+}
+/* Drift upward with gentle zoom */
+@keyframes kb4 {
+  0%   { transform: scale(1)    translate(0,  1%); }
+  100% { transform: scale(1.05) translate(0, -1%); }
+}
+/* Diagonal pan top-left to bottom-right */
+@keyframes kb5 {
+  0%   { transform: scale(1.05) translate(-1%, -1%); }
+  100% { transform: scale(1)    translate( 1%,  1%); }
+}
+/* Zoom out from bottom-right */
+@keyframes kb6 {
+  0%   { transform: scale(1.06) translate(1%, 1%); }
+  100% { transform: scale(1)    translate(0,  0 ); }
+}
+
+/* ===== CHAPTER TOAST ===== */
+.chapter-toast {
+  position: fixed;
+  left: 0;
+  bottom: clamp(28px, 6vh, 56px);
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+  transform: translateX(-110%);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.55s ease;
+  opacity: 0;
+}
+.chapter-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+.chapter-toast.hide {
+  transform: translateX(-110%);
+  opacity: 0;
+}
+.toast-bar {
+  width: 3px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--rose), var(--gold));
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.toast-inner {
+  background: rgba(10,10,10,0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  padding: 8px 16px;
+}
+.toast-issue {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.toast-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(0.85rem, 2vw, 1.05rem);
+  color: var(--white);
+  white-space: nowrap;
+}
+
+/* ===== DOT PULSE RING ===== */
+.dot.active::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rose);
+  animation: dotPulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+.dot { position: relative; }
+@keyframes dotPulse {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  70%  { transform: scale(2.2); opacity: 0;   }
+  100% { transform: scale(2.2); opacity: 0;   }
+}
+
+/* ===== SPARKLE ===== */
+.sparkle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold), transparent);
+  animation: sparkleFloat linear infinite;
+  pointer-events: none;
+}
+@keyframes sparkleFloat {
+  0%   { opacity: 0;   transform: translateY(0)     scale(0); }
+  10%  { opacity: 1;   transform: translateY(-12px)  scale(1); }
+  90%  { opacity: 0.4; transform: translateY(-90px)  scale(0.5); }
+  100% { opacity: 0;   transform: translateY(-110px) scale(0); }
+}
+
+/* ===== LANDSCAPE MOBILE ===== */
+@media (max-height: 480px) and (orientation: landscape) {
+  .scroll-hint { display: none; }
+  .nav-dots {
+    flex-direction: row;
+    right: auto; left: 50%; bottom: 8px; top: auto;
+    transform: translateX(-50%);
+  }
+  .final-message { padding: 20px 20px 14px; }
+  .final-title { font-size: 1.3rem; margin-bottom: 6px; }
+  .final-sub   { font-size: 0.85rem; margin-bottom: 10px; }
+}
+
+/* ===== TINY SCREENS (< 360px) ===== */
+@media (max-width: 360px) {
+  .nav-dots { display: none; }
+}
