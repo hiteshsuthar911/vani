@@ -49,10 +49,11 @@ for (let i = 0; i < TOTAL_PAGES; i++) {
   imgWrapper.className = 'page-image-wrapper';
 
   const img = document.createElement('img');
-  img.src = `pages/page_${String(i + 1).padStart(2, '0')}.png`;
+  img.src = `pages/page_${String(i + 1).padStart(2, '0')}.jpg`;
   img.alt = pageTitles[i];
   img.className = 'page-img';
   img.loading = i < 3 ? 'eager' : 'lazy';
+  if (i === 0) img.setAttribute('fetchpriority', 'high');
 
   const overlay = document.createElement('div');
   overlay.className = `page-glow-overlay ${i % 2 === 0 ? 'warm-overlay' : 'dark-overlay'}`;
@@ -161,6 +162,14 @@ function updateUI(index) {
 
   // Chapter toast
   showToast(pageTitles[index]);
+
+  // Preload next adjacent pages for zero-wait scrolling
+  [index + 1, index + 2].forEach(nextIdx => {
+    if (nextIdx < TOTAL_PAGES) {
+      const preload = new Image();
+      preload.src = `pages/page_${String(nextIdx + 1).padStart(2, '0')}.jpg`;
+    }
+  });
 }
 
 // ===== KEN BURNS: apply/reset per page wrapper =====

@@ -898,6 +898,14 @@
       requestAnimationFrame(animateParticles);
     }
     animateParticles();
+
+    // Silently prefetch first magazine pages in background so index loads instantly
+    window.addEventListener('DOMContentLoaded', () => {
+      ['pages/page_01.jpg', 'pages/page_02.jpg', 'pages/page_03.jpg'].forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    });
   </script>
 
 </body>
